@@ -6,36 +6,62 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import OfflineScreen from "./components/OfflineScreen";
 import useOnlineStatus from "./hooks/useOnlineStatus";
+import { useRouter } from "next/navigation";
 
 export default function RootLayout({ children }) {
-  // const [online, setOnline] = useState(true);
-  const pathname = usePathname();
-  const online = useOnlineStatus();
+  useEffect(() => {
+    setIsInitialized(true);
+  }, []);
 
-  // useEffect(() => {
-  //   setOnline(navigator.onLine);
+  // Prevent navigation when offline
+  useEffect(() => {
+    if (!online) {
+      const handleRouteChange = (e) => {
+        if (!online) {
+          e.preventDefault();
+          // Force re-render to show offline screen
+          router.refresh();
+        }
+      };
 
-  //   const goOnline = () => setOnline(true);
-  //   const goOffline = () => setOnline(false);
+      // Intercept Next.js router events
+      const handleBeforeUnload = (e) => {
+        if (!online) {
+          // Don't prevent default for beforeunload as we want to allow reload
+          // but show offline screen again after reload
+        }
+      };
 
-  //   window.addEventListener("online", goOnline);
-  //   window.addEventListener("offline", goOffline);
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [online, router]);
 
-  //   return () => {
-  //     window.removeEventListener("online", goOnline);
-  //     window.removeEventListener("offline", goOffline);
-  //   };
-  // }, []);
+  // Show nothing during initial SSR to avoid hydration mismatch
+  if (!isInitialized) {
+    return (
+      <html lang="en">
+        <body>
+          <div>Loading...</div>
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="en">
       <body>
         <Header />
+        <main>
           {online ? (
             children
           ) : (
             <OfflineScreen currentPath={pathname} />
           )}
+        </main>
         <Footer />
       </body>
     </html>

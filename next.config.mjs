@@ -5,28 +5,23 @@ const withPWA = withPWAInit({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
+  // Add runtime caching for better offline support
   runtimeCaching: [
     {
-      urlPattern: /^https?.*/, // cache all routes
-      handler: "NetworkFirst",
+      urlPattern: /\/api\/health/,
+      handler: 'NetworkFirst',
       options: {
-        cacheName: "html-cache",
-        networkTimeoutSeconds: 5,
+        cacheName: 'health-check',
         expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-        },
-        cacheableResponse: {
-          statuses: [0, 200],
+          maxEntries: 10,
+          maxAgeSeconds: 3600, // 1 hour
         },
       },
     },
   ],
-  fallbacks: {
-    document: "/offline.html", // fallback if no network
-  },
 });
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
 };
