@@ -9,6 +9,11 @@ import useOnlineStatus from "./hooks/useOnlineStatus";
 import { useRouter } from "next/navigation";
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const online = useOnlineStatus();
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   useEffect(() => {
     setIsInitialized(true);
   }, []);

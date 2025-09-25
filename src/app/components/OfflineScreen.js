@@ -53,7 +53,7 @@ const OfflineScreen = ({ currentPath }) => {
         
         <div className="offline-info">
           <p>Current path: {currentPath}</p>
-          <p>You'll be able to continue browsing once connection is restored.</p>
+          <p>You&apos;ll be able to continue browsing once connection is restored.</p>
         </div>
       </div>
       
