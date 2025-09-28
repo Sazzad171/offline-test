@@ -1,1 +1,53 @@
-if(!self.define){let e,s={};const a=(a,t)=>(a=new URL(a+".js",t).href,s[a]||new Promise(s=>{if("document"in self){const e=document.createElement("script");e.src=a,e.onload=s,document.head.appendChild(e)}else e=a,importScripts(a),s()}).then(()=>{let e=s[a];if(!e)throw new Error(`Module ${a} didn’t register its module`);return e}));self.define=(t,c)=>{const i=e||("document"in self?document.currentScript.src:"")||location.href;if(s[i])return;let n={};const r=e=>a(e,i),f={module:{uri:i},exports:n,require:r};s[i]=Promise.all(t.map(e=>f[e]||r(e))).then(e=>(c(...e),n))}}define(["./workbox-86a8e45e"],function(e){"use strict";importScripts(),self.skipWaiting(),e.clientsClaim(),e.precacheAndRoute([{url:"/_next/app-build-manifest.json",revision:"4154a082a1d1ea6470bb547d061a46ca"},{url:"/_next/static/IDa9GzZUE9-d-3vNzebb3/_buildManifest.js",revision:"5e265c6a9f35ba5b6c4220b89e962e03"},{url:"/_next/static/IDa9GzZUE9-d-3vNzebb3/_ssgManifest.js",revision:"b6652df95db52feb4daf4eca35380933"},{url:"/_next/static/chunks/255-1fb62dcadab77bfb.js",revision:"1fb62dcadab77bfb"},{url:"/_next/static/chunks/356-45c029586f5ce8f3.js",revision:"45c029586f5ce8f3"},{url:"/_next/static/chunks/4bd1b696-c023c6e3521b1417.js",revision:"c023c6e3521b1417"},{url:"/_next/static/chunks/app/_not-found/page-a6420a2339fe1409.js",revision:"a6420a2339fe1409"},{url:"/_next/static/chunks/app/about/page-2697c97cf2dd1375.js",revision:"2697c97cf2dd1375"},{url:"/_next/static/chunks/app/api/health/route-2697c97cf2dd1375.js",revision:"2697c97cf2dd1375"},{url:"/_next/static/chunks/app/layout-95cfec64ef6e6a1e.js",revision:"95cfec64ef6e6a1e"},{url:"/_next/static/chunks/app/offline-fallback/page-6fb35a43ba9221c7.js",revision:"6fb35a43ba9221c7"},{url:"/_next/static/chunks/app/page-4437ae2671e17468.js",revision:"4437ae2671e17468"},{url:"/_next/static/chunks/framework-acd67e14855de5a2.js",revision:"acd67e14855de5a2"},{url:"/_next/static/chunks/main-3fb629ec662652f7.js",revision:"3fb629ec662652f7"},{url:"/_next/static/chunks/main-app-bc189417baafe6f6.js",revision:"bc189417baafe6f6"},{url:"/_next/static/chunks/pages/_app-7d307437aca18ad4.js",revision:"7d307437aca18ad4"},{url:"/_next/static/chunks/pages/_error-cb2a52f75f2162e2.js",revision:"cb2a52f75f2162e2"},{url:"/_next/static/chunks/polyfills-42372ed130431b0a.js",revision:"846118c33b2c0e922d7b3a7676f81f6f"},{url:"/_next/static/chunks/webpack-2eb758dea75faf50.js",revision:"2eb758dea75faf50"},{url:"/_next/static/css/962a23c5bd84e302.css",revision:"962a23c5bd84e302"},{url:"/file.svg",revision:"d09f95206c3fa0bb9bd9fefabfd0ea71"},{url:"/globe.svg",revision:"2aaafa6a49b6563925fe440891e32717"},{url:"/next.svg",revision:"8e061864f388b47f33a1c3780831193e"},{url:"/vercel.svg",revision:"c0af2f507b369b085b35ef4bbe3bcf1e"},{url:"/window.svg",revision:"a2760511c65806022ad20adf74370ff3"}],{ignoreURLParametersMatching:[]}),e.cleanupOutdatedCaches(),e.registerRoute("/",new e.NetworkFirst({cacheName:"start-url",plugins:[{cacheWillUpdate:async({request:e,response:s,event:a,state:t})=>s&&"opaqueredirect"===s.type?new Response(s.body,{status:200,statusText:"OK",headers:s.headers}):s}]}),"GET")});
+// public/sw.js
+const CACHE_NAME = 'offline-v1';
+const OFFLINE_URL = '/offline';
+
+// Install event
+self.addEventListener('install', (event) => {
+  console.log('Service Worker: Installing...');
+  
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Service Worker: Caching offline page');
+        return cache.addAll([
+          OFFLINE_URL,
+          '/',
+          '/manifest.json'
+        ]);
+      })
+      .then(() => {
+        console.log('Service Worker: Skip waiting');
+        return self.skipWaiting();
+      })
+  );
+});
+
+// Activate event
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker: Activating...');
+  event.waitUntil(self.clients.claim());
+});
+
+// Fetch event - CRITICAL FOR OFFLINE RELOADS
+self.addEventListener('fetch', (event) => {
+  // Only handle navigation requests
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          // Network request failed, return offline page
+          return caches.match(OFFLINE_URL);
+        })
+    );
+    return;
+  }
+
+  // For other requests, try cache first, then network
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        return response || fetch(event.request);
+      })
+  );
+});
