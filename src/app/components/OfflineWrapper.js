@@ -10,27 +10,36 @@ export default function OfflineWrapper({ children }) {
   const pathname = usePathname();
   const online = useOnlineStatus();
   const [isClient, setIsClient] = useState(false);
-  const [showOffline, setShowOffline] = useState(false);
+  const [isServiceWorkerReady, setIsServiceWorkerReady] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
-
-  // Handle offline state without sessionStorage
-  useEffect(() => {
-    if (isClient) {
-      if (!online) {
-        setShowOffline(true);
-      } else {
-        setShowOffline(false);
-      }
+    
+    // Check if service worker is ready
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      setIsServiceWorkerReady(true);
     }
-  }, [online, isClient]);
+
+    // Listen for service worker controller changes
+    const handleControllerChange = () => {
+      setIsServiceWorkerReady(!!navigator.serviceWorker.controller);
+    };
+
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+
+    return () => {
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+    };
+  }, []);
 
   // Don't render during SSR
   if (!isClient) {
     return <main className="main-content"><div>Loading...</div></main>;
   }
+
+  // If we're offline and service worker is ready, show offline screen
+  // If service worker isn't ready yet, browser might show its own error page
+  const showOffline = !online;
 
   return (
     <main className="main-content">

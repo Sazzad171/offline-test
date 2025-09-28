@@ -6,29 +6,17 @@ const withPWA = withPWAInit({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
-  // Disable automatic offline page generation
-  // Remove any reference to offline page
-  runtimeCaching: [
-    {
-      urlPattern: /^https?.*/,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'offline-cache',
-        networkTimeoutSeconds: 3,
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 24 * 60 * 60,
-        },
-      },
-    },
-  ],
+  // Use our custom service worker
+  sw: 'sw.js',
+  // Don't generate automatic offline page
+  runtimeCaching: []
 });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Explicitly disable static offline page generation
-  exclude: [/offline/],
+  // Generate static pages for better offline support
+  trailingSlash: true,
 };
 
 export default withPWA(nextConfig);
