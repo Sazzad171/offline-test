@@ -1,26 +1,5 @@
-// src/app/page.js
-"use client";
-
-import { useEffect, useState } from 'react';
 
 export default function Home() {
-  const [isOnline, setIsOnline] = useState(true);
-
-  useEffect(() => {
-    const updateStatus = () => {
-      setIsOnline(navigator.onLine);
-    };
-
-    updateStatus();
-    
-    window.addEventListener('online', updateStatus);
-    window.addEventListener('offline', updateStatus);
-
-    return () => {
-      window.removeEventListener('online', updateStatus);
-      window.removeEventListener('offline', updateStatus);
-    };
-  }, []);
 
   return (
     <div style={{ 
@@ -35,12 +14,10 @@ export default function Home() {
       </p>
 
       <div style={{ 
-        padding: '2rem', 
-        background: isOnline ? '#d4edda' : '#f8d7da',
+        padding: '2rem',
         borderRadius: '8px',
         marginBottom: '2rem'
       }}>
-        <h2>Current Status: {isOnline ? '🟢 Online' : '🔴 Offline'}</h2>
         <p>Disconnect your internet and reload the page to test offline functionality.</p>
       </div>
 
