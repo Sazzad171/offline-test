@@ -1,104 +1,53 @@
-// components/OfflineScreen.jsx
+// src/app/components/OfflineScreen.jsx
 "use client";
-import { useEffect, useState } from 'react';
 
-const OfflineScreen = ({ currentPath }) => {
-  const [isChecking, setIsChecking] = useState(false);
+import { useEffect } from 'react';
 
-  const checkConnection = async () => {
-    setIsChecking(true);
-    try {
-      // Try to fetch a small resource to verify real connectivity
-      await fetch('/api/health', { 
-        method: 'HEAD',
-        cache: 'no-cache'
-      });
-      window.location.reload();
-    } catch (error) {
-      console.log('Still offline');
-    } finally {
-      setIsChecking(false);
-    }
-  };
+const OfflineScreen = ({ currentPath, isOnline }) => {
+  useEffect(() => {
+    // Prevent navigation when offline
+    const handleClick = (e) => {
+      if (!isOnline) {
+        const target = e.target.closest('a');
+        if (target && target.href) {
+          e.preventDefault();
+          alert('Navigation disabled while offline. Please check your internet connection.');
+        }
+      }
+    };
+
+    document.addEventListener('click', handleClick, true);
+
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+    };
+  }, [isOnline]);
 
   const tryAgain = () => {
-    checkConnection();
-  };
-
-  const reloadPage = () => {
     window.location.reload();
   };
 
   return (
     <div className="offline-screen">
       <div className="offline-content">
-        <h1>No Internet Connection</h1>
-        <p>Please check your network connection and try again.</p>
+        <h1>📡 No Internet Connection</h1>
+        <p>You are currently offline. Please check your internet connection.</p>
         
         <div className="offline-actions">
-          <button 
-            onClick={tryAgain} 
-            disabled={isChecking}
-            className="retry-button"
-          >
-            {isChecking ? 'Checking...' : 'Try Again'}
-          </button>
-          <button 
-            onClick={reloadPage}
-            className="reload-button"
-          >
-            Reload Page
+          <button onClick={tryAgain} className="retry-button">
+            Try Again
           </button>
         </div>
         
         <div className="offline-info">
-          <p>Current path: {currentPath}</p>
-          <p>You&apos;ll be able to continue browsing once connection is restored.</p>
+          <p><strong>Current Page:</strong> {currentPath}</p>
+          <p><strong>Connection Status:</strong> 
+            <span className={isOnline ? 'status-online' : 'status-offline'}>
+              {isOnline ? ' Online' : ' Offline'}
+            </span>
+          </p>
         </div>
       </div>
-      
-      <style jsx>{`
-        .offline-screen {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 60vh;
-          padding: 2rem;
-        }
-        
-        .offline-content {
-          text-align: center;
-          max-width: 500px;
-        }
-        
-        .offline-actions {
-          margin: 2rem 0;
-          display: flex;
-          gap: 1rem;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-        
-        .retry-button, .reload-button {
-          padding: 0.75rem 1.5rem;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 1rem;
-        }
-        
-        .retry-button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-        
-        .offline-info {
-          margin-top: 2rem;
-          padding: 1rem;
-          background: #f5f5f5;
-          border-radius: 4px;
-        }
-      `}</style>
     </div>
   );
 };

@@ -1,20 +1,25 @@
+// src/app/hooks/useOnlineStatus.js
 import { useState, useEffect } from 'react';
 
 const useOnlineStatus = () => {
-  const [online, setOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true);
+  const [online, setOnline] = useState(true); // Default to true for SSR
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    // Client-side only
+    const updateOnlineStatus = () => {
+      setOnline(navigator.onLine);
+    };
 
-    const handleOnline = () => setOnline(true);
-    const handleOffline = () => setOnline(false);
+    // Set initial status
+    updateOnlineStatus();
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    // Add event listeners
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', updateOnlineStatus);
+      window.removeEventListener('offline', updateOnlineStatus);
     };
   }, []);
 

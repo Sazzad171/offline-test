@@ -1,3 +1,4 @@
+// next.config.js
 import withPWAInit from "next-pwa";
 
 const withPWA = withPWAInit({
@@ -5,16 +6,18 @@ const withPWA = withPWAInit({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
-  // Add runtime caching for better offline support
+  // Disable automatic offline page generation
+  // Remove any reference to offline page
   runtimeCaching: [
     {
-      urlPattern: /\/api\/health/,
+      urlPattern: /^https?.*/,
       handler: 'NetworkFirst',
       options: {
-        cacheName: 'health-check',
+        cacheName: 'offline-cache',
+        networkTimeoutSeconds: 3,
         expiration: {
-          maxEntries: 10,
-          maxAgeSeconds: 3600, // 1 hour
+          maxEntries: 200,
+          maxAgeSeconds: 24 * 60 * 60,
         },
       },
     },
@@ -24,6 +27,8 @@ const withPWA = withPWAInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Explicitly disable static offline page generation
+  exclude: [/offline/],
 };
 
 export default withPWA(nextConfig);

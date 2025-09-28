@@ -1,7 +1,7 @@
-function Footer() {
+function About() {
   return (
     <div>about</div>
   );
 }
 
-export default Footer;
+export default About;
