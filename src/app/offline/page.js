@@ -36,7 +36,7 @@ export default function OfflinePage() {
       padding: '20px',
       textAlign: 'center'
     }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>📡 You're Offline</h1>
+      <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>📡 You&apos;re Offline</h1>
       <p style={{ fontSize: '1.2rem', marginBottom: '2rem' }}>
         Please check your internet connection and try again.
       </p>
